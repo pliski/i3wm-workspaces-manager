@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "i3wm-workspaces-manager"
+version = "0.1.0"
+description = "A GTK-based workspace manager for i3wm"
+authors = ["pliski <pliski@pli.ski>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+PyGObject = "^3.42.0"
+i3ipc = "^2.2.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.0"
+
+[tool.poetry.scripts]
+i3wm-workspaces-manager = "i3wm_workspaces_manager.__main__:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
