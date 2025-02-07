@@ -14,6 +14,8 @@ class BaseWindow(Gtk.Window):
         
         # Connect key events
         self.connect('key-press-event', self._on_key_press)
+        # Connect focus out event
+        self.connect('focus-out-event', self._on_focus_out)
         
     def _on_key_press(self, widget, event):
         """Handle key press events"""
@@ -24,4 +26,9 @@ class BaseWindow(Gtk.Window):
             self.hide()
             return True
             
+        return False
+        
+    def _on_focus_out(self, widget, event):
+        """Hide window when it loses focus"""
+        self.hide()
         return False 
