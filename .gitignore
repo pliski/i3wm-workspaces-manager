@@ -4,4 +4,5 @@
 **/.idea/**
 **/.vscode/**
 **/.DS_Store
-stash
+stash/
+dist/
