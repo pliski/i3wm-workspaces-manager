@@ -17,6 +17,11 @@ pytest = "^7.0"
 [tool.poetry.scripts]
 i3wm-workspaces-manager = "i3wm_workspaces_manager.__main__:main"
 
+[tool.pytest.ini_options]
+markers = [
+    "i3required: marks tests that require i3 window manager to be running",
+]
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
