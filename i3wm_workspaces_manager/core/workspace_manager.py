@@ -49,4 +49,9 @@ class WorkspaceManager:
             return False, "Workspace name cannot be empty"
         
         # Add more validation rules as needed
-        return True, "" 
+        return True, ""
+
+    def move_window_to_workspace(self, window_id, workspace_name):
+        """Move a window to a specific workspace."""
+        command = f'[con_id="{window_id}"] move container to workspace {workspace_name}'
+        self.i3.command(command) 
