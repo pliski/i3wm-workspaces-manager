@@ -1,0 +1,3 @@
+# ToDo
+- [ ] move workspace to output ...
+- [ ] move window to a new workspace with a name
