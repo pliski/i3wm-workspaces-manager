@@ -9,6 +9,7 @@ class WorkspaceCreatorWindow(BaseWindow):
     def __init__(self):
         super().__init__(title="i3wm-workspaces-manager")
         self.workspace_manager = WorkspaceManager()
+        self.previously_focused_window = None
         
         # Create main container
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
@@ -30,16 +31,61 @@ class WorkspaceCreatorWindow(BaseWindow):
         self.rename_check = Gtk.CheckButton(label="Rename current workspace")
         vbox.pack_start(self.rename_check, True, True, 0)
         
+        # Add move window checkbox
+        self.move_window_check = Gtk.CheckButton(label="Move window to new workspace")
+        vbox.pack_start(self.move_window_check, True, True, 0)
+        
+        # Create buttons box
+        buttons_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        buttons_box.set_margin_top(6)
+        vbox.pack_start(buttons_box, False, False, 0)
+        
+        # Add Create button
+        self.create_button = Gtk.Button(label="Create Workspace")
+        self.create_button.connect('clicked', self._on_activate)
+        buttons_box.pack_start(self.create_button, True, True, 0)
+        
+        # Add CSS styling for focused button
+        css_provider = Gtk.CssProvider()
+        css_provider.load_from_data(b"""
+            .focused-button:focus {
+                background-color: #215d9c;
+                color: white;
+            }
+        """)
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Screen.get_default(),
+            css_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+        
+        # Add style class
+        self.create_button.get_style_context().add_class('focused-button')
+        
         # Connect signals
         self.name_entry.connect('activate', self._on_activate)
         self.connect('show', self._on_show)
+        self.connect('hide', self._on_hide)
         
     def _on_show(self, widget):
-        """Update the next available number when window is shown"""
+        """Update the next available number and store focused window when window is shown"""
+        # Store the previously focused window
+        tree = self.workspace_manager.i3.get_tree()
+        self.previously_focused_window = tree.find_focused()
+        
+        # Set default values
         next_num = str(self.workspace_manager.get_next_available_number())
         self.name_entry.set_text(next_num)
-        self.rename_check.set_active(False)        
-
+        self.rename_check.set_active(False)
+        self.move_window_check.set_active(False)
+        
+        # Set initial focus to the entry field
+        self.name_entry.grab_focus()
+        
+    def _on_hide(self, widget):
+        """Reset state when window is hidden"""
+        self.previously_focused_window = None
+        
     def _on_key_press(self, widget, event):
         """Handle key press events"""
         keyval = event.keyval
@@ -50,6 +96,18 @@ class WorkspaceCreatorWindow(BaseWindow):
             return True
         elif keyval_name == 'Return':
             self._on_activate(None)
+            return True
+        elif keyval_name == 'Tab':
+            # Cycle focus between entry, checkboxes and button
+            focused = self.get_focus()
+            if focused == self.name_entry:
+                self.rename_check.grab_focus()
+            elif focused == self.rename_check:
+                self.move_window_check.grab_focus()
+            elif focused == self.move_window_check:
+                self.create_button.grab_focus()
+            else:
+                self.name_entry.grab_focus()
             return True
             
         return False
@@ -69,10 +127,19 @@ class WorkspaceCreatorWindow(BaseWindow):
             dialog.run()
             dialog.destroy()
             return
+        
+        move_window = self.move_window_check.get_active() and self.previously_focused_window
             
         if self.rename_check.get_active():
             self.workspace_manager.rename_current_workspace(name)
         else:
             self.workspace_manager.create_workspace(name)
+            
+        # Move the previously focused window if checkbox is checked
+        if move_window:
+            self.workspace_manager.move_window_to_workspace(
+                self.previously_focused_window.id,
+                name
+            )
             
         self.hide()
