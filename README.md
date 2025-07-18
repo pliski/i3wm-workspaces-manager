@@ -28,6 +28,20 @@ Run the application
 poetry run i3wm-workspaces-manager
 ```
 
+### Install in the local system
+
+In the project directory:
+```sh
+poetry build
+```
+
+In another shell (without venv):
+```sh
+rm -f /home/pliski/.local/bin/i3wm-focus-wrap
+rm -f /home/pliski/.local/bin/i3wm-workspaces-manager
+pip install --user --break-system-packages --force-reinstall dist/*.whl
+```
+
 ## Configuration
 
 Add the appropriate bindings to your i3 config file (`~/.config/i3/config`), for example:
