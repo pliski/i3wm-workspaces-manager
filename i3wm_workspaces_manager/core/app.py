@@ -1,12 +1,22 @@
 import i3ipc
 import gi
+import sys
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GLib
 
 
 class I3WorkspacesManager:
     def __init__(self):
-        self.i3 = i3ipc.Connection()
+        try:
+            # Try to connect to i3wm with a timeout
+            self.i3 = i3ipc.Connection()
+            # Test the connection
+            self.i3.get_workspaces()
+        except Exception as e:
+            print(f"Error: Could not connect to i3wm: {e}")
+            print("Please make sure i3wm is running and accessible.")
+            sys.exit(1)
+        
         self.creator_window = None
         self.switcher_window = None
         
@@ -33,8 +43,8 @@ class I3WorkspacesManager:
             WorkspaceCreatorWindow,         
         )
         
-        self.creator_window = WorkspaceCreatorWindow()
-        self.switcher_window = WorkspaceSwitcherWindow()
+        self.creator_window = WorkspaceCreatorWindow(self.i3)
+        self.switcher_window = WorkspaceSwitcherWindow(self.i3)
         return False  # Don't repeat this idle callback
         
     def _on_binding_event(self, i3conn, event):

@@ -3,8 +3,8 @@
 from i3ipc import Connection, Event
 import sys
 
-def get_windows_on_output(tree, output_name):
-    """Get all windows on a specific output."""
+def get_windows_in_workspace(tree, workspace_id):
+    """Get all windows in a specific workspace."""
     windows = []
     current_window = None
     
@@ -17,13 +17,13 @@ def get_windows_on_output(tree, output_name):
             container.parent and 
             container.parent.type != 'dockarea'):
             
-            # Find the output for this container
+            # Find the workspace for this container
             node = container
-            while node and node.type != 'output':
+            while node and node.type != 'workspace':
                 node = node.parent
                 
-            # If this window is on the desired output, add it
-            if node and node.name == output_name:
+            # If this window is in the desired workspace, add it
+            if node and node.id == workspace_id:
                 windows.append(container)
                 if container.focused:
                     current_window = container
@@ -40,15 +40,15 @@ def get_windows_on_output(tree, output_name):
     
     return windows, current_window
 
-def find_current_output(tree):
-    """Find the output containing the focused window."""
+def find_current_workspace(tree):
+    """Find the workspace containing the focused window."""
     focused = tree.find_focused()
     if not focused:
         return None
     
-    # Find the output containing the focused window
+    # Find the workspace containing the focused window
     node = focused
-    while node and node.type != 'output':
+    while node and node.type != 'workspace':
         node = node.parent
     
     return node
@@ -61,17 +61,17 @@ def main(direction):
     i3 = Connection()
     tree = i3.get_tree()
     
-    # Find the current output
-    output = find_current_output(tree)
-    if not output:
-        print("No active output found")
+    # Find the current workspace
+    workspace = find_current_workspace(tree)
+    if not workspace:
+        print("No active workspace found")
         return
     
-    # Get windows on the current output
-    windows, current_window = get_windows_on_output(tree, output.name)
+    # Get windows in the current workspace
+    windows, current_window = get_windows_in_workspace(tree, workspace.id)
     
     if not windows:
-        print(f"No windows found on output {output.name}")
+        print(f"No windows found in workspace {workspace.name}")
         return
     
     if not current_window:

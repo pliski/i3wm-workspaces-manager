@@ -6,9 +6,9 @@ from .base_window import BaseWindow
 from ..core.workspace_manager import WorkspaceManager
 
 class WorkspaceCreatorWindow(BaseWindow):
-    def __init__(self):
+    def __init__(self, i3_connection):
         super().__init__(title="i3wm-workspaces-manager")
-        self.workspace_manager = WorkspaceManager()
+        self.workspace_manager = WorkspaceManager(i3_connection)
         self.previously_focused_window = None
         
         # Create main container

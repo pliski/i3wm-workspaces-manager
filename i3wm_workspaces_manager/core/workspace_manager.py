@@ -1,8 +1,16 @@
 import i3ipc
 
 class WorkspaceManager:
-    def __init__(self):
-        self.i3 = i3ipc.Connection()
+    def __init__(self, i3_connection=None):
+        if i3_connection is not None:
+            self.i3 = i3_connection
+        else:
+            try:
+                self.i3 = i3ipc.Connection()
+                # Test the connection
+                self.i3.get_workspaces()
+            except Exception as e:
+                raise RuntimeError(f"Could not connect to i3wm: {e}")
 
     def get_next_available_number(self):
         """Find the lowest available workspace number."""
