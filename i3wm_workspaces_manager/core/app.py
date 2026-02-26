@@ -1,22 +1,66 @@
+import os
+import subprocess
+import sys
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
+
 import i3ipc
 import gi
-import sys
+
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GLib
+
+CONNECT_TIMEOUT_SEC = 5
+
+
+def _get_i3_socket_path():
+    """Resolve i3/sway IPC socket path without blocking on X11."""
+    path = os.environ.get('I3SOCK') or os.environ.get('SWAYSOCK')
+    if path:
+        return path
+    try:
+        out = subprocess.run(
+            ['i3', '--get-socketpath'],
+            capture_output=True,
+            text=True,
+            timeout=2,
+        )
+        if out.returncode == 0 and out.stdout:
+            return out.stdout.strip()
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        pass
+    return None
 
 
 class I3WorkspacesManager:
     def __init__(self):
+        print('i3 Workspaces Manager: starting…', flush=True)
+        socket_path = _get_i3_socket_path()
+        if socket_path:
+            print(f'i3 Workspaces Manager: using socket {socket_path}', flush=True)
+
+        def connect_and_test():
+            conn = i3ipc.Connection(socket_path=socket_path)
+            conn.get_workspaces()
+            return conn
+
         try:
-            # Try to connect to i3wm with a timeout
-            self.i3 = i3ipc.Connection()
-            # Test the connection
-            self.i3.get_workspaces()
-        except Exception as e:
-            print(f"Error: Could not connect to i3wm: {e}")
-            print("Please make sure i3wm is running and accessible.")
+            with ThreadPoolExecutor(max_workers=1) as ex:
+                fut = ex.submit(connect_and_test)
+                self.i3 = fut.result(timeout=CONNECT_TIMEOUT_SEC)
+        except FuturesTimeoutError:
+            print('Error: Connection to i3 timed out.', file=sys.stderr, flush=True)
+            print(
+                'Make sure i3 is running and, if needed, set I3SOCK to the IPC socket path.',
+                file=sys.stderr,
+                flush=True,
+            )
             sys.exit(1)
-        
+        except Exception as e:
+            print(f'Error: Could not connect to i3: {e}', file=sys.stderr, flush=True)
+            print('Make sure i3 is running and accessible.', file=sys.stderr, flush=True)
+            sys.exit(1)
+
+        print('i3 Workspaces Manager: connected. Listening for keybindings.', flush=True)
         self.creator_window = None
         self.switcher_window = None
         
