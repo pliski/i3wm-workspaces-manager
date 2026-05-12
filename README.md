@@ -30,16 +30,20 @@ poetry run i3wm-workspaces-manager
 
 ### Install in the local system
 
-In the project directory:
+Install [pipx](https://pipx.pypa.io/) if you don't have it (`sudo pacman -S python-pipx` on Arch, `sudo apt install pipx` on Debian/Ubuntu, or check the pipx docs).
+
+Then, from the repo root:
+
 ```sh
-poetry build
+make install
 ```
 
-In another shell (without venv):
+This builds the project, installs it into an isolated pipx-managed environment, and adds `i3wm-workspaces-manager` and `i3wm-focus-wrap` to your `PATH` (typically `~/.local/bin`). Re-running `make install` upgrades an existing install in place.
+
+To uninstall:
+
 ```sh
-rm -f /home/pliski/.local/bin/i3wm-focus-wrap
-rm -f /home/pliski/.local/bin/i3wm-workspaces-manager
-pip install --user --break-system-packages --force-reinstall dist/*.whl
+make uninstall
 ```
 
 ## Configuration
