@@ -7,12 +7,12 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.10"
 PyGObject = "^3.42.0"
 i3ipc = "^2.2.1"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.0"
+pytest = "^9.0"
 
 [tool.poetry.scripts]
 i3wm-workspaces-manager = "i3wm_workspaces_manager.__main__:main"
