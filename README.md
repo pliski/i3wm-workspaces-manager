@@ -30,15 +30,24 @@ poetry run i3wm-workspaces-manager
 
 ### Install in the local system
 
-Install [pipx](https://pipx.pypa.io/) if you don't have it (`sudo pacman -S python-pipx` on Arch, `sudo apt install pipx` on Debian/Ubuntu, or check the pipx docs).
-
-Then, from the repo root:
-
 ```sh
 make install
 ```
 
-This builds the project, installs it into an isolated pipx-managed environment, and adds `i3wm-workspaces-manager` and `i3wm-focus-wrap` to your `PATH` (typically `~/.local/bin`). Re-running `make install` upgrades an existing install in place.
+`make install` picks the right backend automatically:
+
+- **Most distros** (Arch, Debian/Ubuntu, etc.): installs via [pipx](https://pipx.pypa.io/)
+  into an isolated environment, reusing the system PyGObject/GTK. Install pipx first if
+  needed (`sudo pacman -S python-pipx` on Arch, `sudo apt install pipx` on Debian/Ubuntu).
+- **NixOS**: installs the bundled Nix flake into your user profile with `nix profile`.
+  PyGObject and GTK can't be built or reused via pipx here, so the flake provides them
+  (and wires the GObject-introspection typelibs) instead. Requires `nix-command` and
+  `flakes` enabled (you can also run directly with `nix run .` or enter a dev shell with
+  `nix develop`).
+
+Either way, this adds `i3wm-workspaces-manager` and `i3wm-focus-wrap` to your `PATH`
+(`~/.local/bin` for pipx, `~/.nix-profile/bin` on NixOS). Re-running `make install`
+upgrades an existing install in place.
 
 To uninstall:
 
