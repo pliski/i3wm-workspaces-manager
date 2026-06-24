@@ -7,8 +7,7 @@ from i3wm_workspaces_manager.gui.workspace_switcher_window import WorkspaceSwitc
 class TestWorkspaceCreatorWindow:
     @pytest.fixture
     def window(self, mock_i3):
-        with patch('i3ipc.Connection', return_value=mock_i3):
-            return WorkspaceCreatorWindow()
+        return WorkspaceCreatorWindow(mock_i3)
         
     @pytest.mark.i3required(reason="This test is not working because of the way i3ipc is mocked")
     def test_initial_state(self, window):
@@ -33,11 +32,12 @@ class TestWorkspaceCreatorWindow:
 class TestWorkspaceSwitcherWindow:
     @pytest.fixture
     def window(self, mock_i3):
-        with patch('i3ipc.Connection', return_value=mock_i3):
-            return WorkspaceSwitcherWindow()
+        return WorkspaceSwitcherWindow(mock_i3)
 
     @pytest.mark.i3required(reason="This test is not working because of the way i3ipc is mocked")
     def test_navigation_keys(self, window):
+        # Up/Down move the selection only while the listbox holds focus.
+        window.get_focus = lambda: window.listbox
         # Test Up key
         up_event = MagicMock()
         up_event.keyval = Gdk.KEY_Up
