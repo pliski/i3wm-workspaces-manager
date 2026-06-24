@@ -42,7 +42,7 @@
 
           meta = with pkgs.lib; {
             description = "A GTK-based workspace manager for i3wm";
-            license = licenses.mit;
+            license = licenses.gpl3Only;
             mainProgram = "i3wm-workspaces-manager";
           };
         };
